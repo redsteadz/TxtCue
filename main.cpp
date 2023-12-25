@@ -41,7 +41,6 @@ void stopwatch() {
 
 void typeLine(std::string text) {
   clear();
-  std::thread stopwatchThread(stopwatch);
   attrset(A_DIM);
   int r, c;
   getmaxyx(stdscr, r, c);
@@ -75,6 +74,22 @@ void typeLine(std::string text) {
     mvprintw(start_row, start_col + i, "%c", ch);
     refresh();
   }
+
+}
+
+
+void linePrinter(){
+  std::thread stopwatchThread(stopwatch);
+  std::string line[] = {
+    "This a substitute text",
+    "Another Substitue text",
+    "Bro Gone mad, here's another"
+  };
+  
+  for (int i = 0; i < 3; i++){
+    typeLine(line[i]);
+  }
+
   // Stop the stopwatch
   stopWatchActive = false;
 
@@ -82,67 +97,82 @@ void typeLine(std::string text) {
   stopwatchThread.join();
 }
 
-void updateMenu(std::string menuItems[], int items, int ch) {
-  int r, c;
-  getmaxyx(stdscr, r, c);
-  clear();
-  // Vertical Padding
-  int vpad = (r / 2) - (items / 2);
-  move(vpad, 0);
-  for (int i = 0; i < items; i++) {
-    int hpad = (c / 2) - (menuItems[i].length() / 2);
-    if (i == ch)
-      mvprintw(vpad + i, hpad - 3, "[[ %s ]]", menuItems[i].c_str());
-    else
-      mvprintw(vpad + i, hpad, "%s", menuItems[i].c_str());
-    refresh();
-  }
-}
 
-int menuPicker(std::string menuItems[], int items) {
-  clear();
-  char ch;
-  int pos = 0;
-  updateMenu(menuItems, items, pos);
-  while (ch != '\n') {
+class UI {
+public:
+  void screenInit(){
+    initscr();
+    noecho();
+  }
+
+  void updateMenu(std::string menuItems[], int items, int ch) {
+    int r, c;
+    getmaxyx(stdscr, r, c);
+    clear();
+    // Vertical Padding
+    int vpad = (r / 2) - (items / 2);
+    move(vpad, 0);
+    for (int i = 0; i < items; i++) {
+      int hpad = (c / 2) - (menuItems[i].length() / 2);
+      if (i == ch)
+        mvprintw(vpad + i, hpad - 3, "[[ %s ]]", menuItems[i].c_str());
+      else
+        mvprintw(vpad + i, hpad, "%s", menuItems[i].c_str());
+      refresh();
+    }
+  }
+
+  int menuPicker(std::string menuItems[], int items) {
+    clear();
+    char ch;
+    int pos = 0;
     updateMenu(menuItems, items, pos);
-    ch = getch();
+    while (ch != '\n') {
+      updateMenu(menuItems, items, pos);
+      ch = getch();
+      switch (ch) {
+      case 'w':
+        if (pos > 0)
+          pos--;
+        break;
+      case 's':
+        if (pos < items - 1)
+          pos++;
+        break;
+      }
+    }
+    return pos;
+  }
+
+  void main_menu() {
+    std::string menuItems[] = {"Start", "Options", "Exit"};
+    int ch = menuPicker(menuItems, 3);
     switch (ch) {
-    case 'w':
-      if (pos > 0)
-        pos--;
+    case 0:
+      // typeLine("This text is centered horizontally.");
+      linePrinter();
       break;
-    case 's':
-      if (pos < items - 1)
-        pos++;
+    case 1:
+      printw("Options");
+      break;
+    case 2:
+    default:
       break;
     }
   }
-  return pos;
-}
+private:
+  
+};
 
-void main_menu() {
-  std::string menuItems[] = {"Start", "Options", "Exit"};
-  int ch = menuPicker(menuItems, 3);
-  switch (ch) {
-  case 0:
-    typeLine("This text is centered horizontally.");
-    break;
-  case 1:
-    printw("Options");
-    break;
-  case 2:
-  default:
-    break;
-  }
-}
+
+
 
 int main() {
-  // Initialize ncurses
-  initscr();
-  noecho();
-  // typeLine("This text is centered horizontally.");
-  main_menu();
+
+  UI mainWin;
+
+  mainWin.screenInit();
+  mainWin.main_menu();
   endwin();
 
   return 0;
