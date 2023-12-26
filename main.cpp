@@ -39,8 +39,20 @@ void stopwatch() {
   }
 }
 
+void printCenteredOffset(std::string s, int verticalOffset, int HorizontalOffset) {
+  int r, c;
+  getmaxyx(stdscr, r, c);
+  
+  if (c <= s.length()) {
+    mvprintw((r-1)/2 + verticalOffset, 0, "%s", s.c_str());
+    return;
+  }
+
+  mvprintw((r-1)/2 + verticalOffset, c/2 - s.length()/2 + HorizontalOffset, "%s", s.c_str());
+}
+
 void typeLine(std::string text) {
-  clear();
+  // clear();
   attrset(A_DIM);
   int r, c;
   getmaxyx(stdscr, r, c);
@@ -61,6 +73,8 @@ void typeLine(std::string text) {
   refresh();
 
   // Wait for a key press
+  mvprintw(0, c/2 - 4, "Word: 0");
+  move(start_row, start_col);
   int words = 0;
   for (int i = 0; i < text.length(); i++) {
     char ch = '*';
@@ -68,7 +82,7 @@ void typeLine(std::string text) {
       ;
     if (ch == ' ')
       words++;
-    mvprintw(0, 30, "Word: %d", words);
+    mvprintw(0, c/2 - 4, "Word: %d", words);
     move(start_row, start_col + i);
     attrset(A_NORMAL);
     mvprintw(start_row, start_col + i, "%c", ch);
@@ -80,14 +94,37 @@ void typeLine(std::string text) {
 
 void linePrinter(){
   std::thread stopwatchThread(stopwatch);
-  std::string line[] = {
-    "This a substitute text",
-    "Another Substitue text",
-    "Bro Gone mad, here's another"
-  };
+    std::string lines[] = {
+        "In the mystical forest, where whispers dance among the trees,",
+        "Moonlight paints secrets on the canvas of the midnight breeze.",
+        "A mischievous fox, adorned in emerald dreams, leads the way,",
+        "To a hidden realm where fireflies and wishes forever sway.",
+        "Beneath the starry tapestry, a cosmic waltz takes flight,",
+        "Galaxies pirouette, casting ethereal glow in the night.",
+        "Time, a fleeting jester, twirls through the cosmic masquerade,",
+        "As stardust symphonies serenade the universe unafraid.",
+        "Whispers of adventure echo in the ancient pirate's cove,",
+        "Where the sea sings shanties, and treasure maps treasure trove.",
+        "Captain Scarlet Beard, with a parrot named Azure Sky,",
+        "Set sail for dreams unknown, under the banners of the high.",
+        "As dawn's first light weaves tales of a new day's birth,",
+        "The array of strings bids adieu, a journey through creativity's mirth."
+    };
   
-  for (int i = 0; i < 3; i++){
-    typeLine(line[i]);
+  int r, c;
+  getmaxyx(stdscr, r, c);
+  
+  size_t numLines = sizeof(lines) / sizeof(lines[0]);
+
+  for (int i = 0; i < numLines; i++){
+    clear();
+    if(i > 0) printCenteredOffset(lines[i - 1], -1, 0);
+    attron(A_DIM);
+    // if(i < numLines - 1) mvprintw((r-1)/2 +  1, c/2 - lines[i + 1].length()/2, "%s", lines[i + 1].c_str());
+    if(i < numLines - 1) printCenteredOffset(lines[i + 1], 1, 0);
+    refresh();
+    attroff(A_DIM);
+    typeLine(lines[i]);
   }
 
   // Stop the stopwatch
