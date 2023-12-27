@@ -12,10 +12,12 @@
  * DONE: Add a timer
  * DONE: Add a score
  * TODO: Use Classes To make the code more organized
- * TODO: Make the text scrolling from one line to another 
+ * DONE: Make the text scrolling from one line to another 
  * TODO: Make the UI responsive (figure out how)
  * TODO: How to add boxes
  */
+
+// StopWatch class that also gives the state of the time it is in 
 
 std::atomic<bool> stopWatchActive(true);
 
@@ -44,7 +46,7 @@ void printCenteredOffset(std::string s, int verticalOffset, int HorizontalOffset
   getmaxyx(stdscr, r, c);
   
   if (c <= s.length()) {
-    mvprintw((r-1)/2 + verticalOffset, 0, "%s", s.c_str());
+    mvprintw((r-1)/2 + verticalOffset * (s.length() % c), 0, "%s", s.c_str());
     return;
   }
 
